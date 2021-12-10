@@ -18,3 +18,9 @@ docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v portainer_data:/data \
     cr.portainer.io/portainer/portainer-ce:2.9.3
+
+sudo  apt-get  install nginx
+sudo ufw allow 80
+sudo ufw allow 443
+sudo apt install letsencrypt
+apt install python3-certbot-nginx
