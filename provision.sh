@@ -4,7 +4,9 @@ sudo apt-get install \
     ca-certificates \
     curl \
     gnupg \
-    lsb-release
+    lsb-release \
+    hostapd \
+    dnsmasq
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 echo \
@@ -22,3 +24,47 @@ docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
 
 sudo mkdir /var/docker
 sudo chmod 0777 /var/docker
+
+# Stop and disable the system's default DHCP and DNS services
+sudo systemctl stop systemd-resolved
+sudo systemctl disable systemd-resolved
+
+# Configure network interface
+sudo ip link set wlp1s0 down
+sudo ip addr flush dev wlp1s0
+sudo ip addr add 192.168.0.98/24 dev wlp1s0
+sudo ip link set wlp1s0 up
+
+# Start DHCP and DNS with dnsmasq
+sudo cat << EOF > /etc/dnsmasq.conf
+interface=wlp1s0
+dhcp-range=192.168.0.10,192.168.0.60,12h
+address=/#/192.168.0.98
+EOF
+
+# Configure hostapd for the access point
+sudo cat << EOF > /etc/hostapd/hostapd.conf
+interface=wlp1s0
+ssid=View4All
+hw_mode=g
+channel=6
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+EOF
+
+# Start hostapd and dnsmasq
+sudo systemctl unmask hostapd
+sudo systemctl enable hostapd
+sudo systemctl start hostapd
+sudo systemctl enable dnsmasq
+sudo systemctl start dnsmasq
+
+# Enable IP forwarding to provide internet access
+sudo sysctl net.ipv4.ip_forward=1
+#sudo iptables -t nat -A POSTROUTING -o <your_internet_interface> -j MASQUERADE
+
+# Save the IP forwarding configuration
+sudo sh -c "echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf"
+
+echo "Setup complete. The Access Point with SSID 'View4All' and captive portal is now running."
