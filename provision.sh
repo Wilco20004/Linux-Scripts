@@ -22,10 +22,3 @@ docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
 
 sudo mkdir /var/docker
 sudo chmod 0777 /var/docker
-
-sudo docker run --name code-server -p 9111:8080 \
-  -v "/var/docker/vscode:/home/coder" \
-  -v "/var/docker:/home/coder/docker" \
-  -u "$(id -u):$(id -g)" \
-  -e "DOCKER_USER=$USER" \
-  codercom/code-server:latest
