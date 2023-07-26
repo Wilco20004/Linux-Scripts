@@ -21,7 +21,7 @@ sudo docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
     -v portainer_data:/data \
     cr.portainer.io/portainer/portainer-ce:latest
 
-
+#Prep docker folders 
 sudo mkdir /var/docker
 sudo chmod 0777 /var/docker
 
@@ -44,6 +44,7 @@ address=/#/192.168.0.98
 EOF
 
 # Configure hostapd for the access point
+sudo touch /etc/hostapd/hostapd.conf
 sudo chmod 0777 /etc/hostapd/hostapd.conf
 sudo cat << EOF > /etc/hostapd/hostapd.conf
 interface=wlp1s0
