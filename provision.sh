@@ -15,7 +15,7 @@ echo \
  sudo apt-get update
  sudo apt-get install docker-ce docker-ce-cli containerd.io -y
 sudo docker volume create portainer_data
-docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
+sudo docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
     --restart=always \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v portainer_data:/data \
@@ -36,6 +36,7 @@ sudo ip addr add 192.168.0.98/24 dev wlp1s0
 sudo ip link set wlp1s0 up
 
 # Start DHCP and DNS with dnsmasq
+sudo chmod 0777 /etc/dnsmasq.conf
 sudo cat << EOF > /etc/dnsmasq.conf
 interface=wlp1s0
 dhcp-range=192.168.0.10,192.168.0.60,12h
@@ -43,6 +44,7 @@ address=/#/192.168.0.98
 EOF
 
 # Configure hostapd for the access point
+sudo chmod 0777 /etc/hostapd/hostapd.conf
 sudo cat << EOF > /etc/hostapd/hostapd.conf
 interface=wlp1s0
 ssid=View4All
