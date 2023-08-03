@@ -13,7 +13,7 @@ echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
  sudo apt-get update
- sudo apt-get install docker-ce docker-ce-cli containerd.io -y
+ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose -y
 sudo docker volume create portainer_data
 sudo docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
     --restart=always \
@@ -24,6 +24,23 @@ sudo docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
 #Prep docker folders 
 sudo mkdir /var/docker
 sudo chmod 0777 /var/docker
+
+cat <<EOF > docker-compose.yml
+version: '3.8'
+
+services:
+  view4all:
+    image: registry.peachss.co.za/view4all_client-server:qa
+    container_name: view4all_container
+    environment:
+      - DeviceID=v4a_fitlet-bench02
+      - ParentServer=https://ver4.view4all.tv/
+    volumes:
+      - /var/docker/v4-server:/app/wwwroot/content
+    ports:
+      - "8000:8080"
+EOF
+docker-compose up -d
 
 # Stop and disable the system's default DHCP and DNS services
 sudo systemctl stop systemd-resolved
