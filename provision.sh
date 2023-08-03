@@ -1,5 +1,8 @@
 sudo apt-get remove docker docker-engine docker.io containerd runc
 sudo apt-get update
+# Stop and disable the system's default DHCP and DNS services
+sudo systemctl stop systemd-resolved
+sudo systemctl disable systemd-resolved
 sudo apt-get install \
     ca-certificates \
     curl \
@@ -42,9 +45,7 @@ services:
 EOF
 sudo docker-compose up -d
 
-# Stop and disable the system's default DHCP and DNS services
-sudo systemctl stop systemd-resolved
-sudo systemctl disable systemd-resolved
+
 
 # Configure network interface
 sudo ip link set wlp1s0 down
