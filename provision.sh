@@ -40,7 +40,7 @@ services:
     ports:
       - "8000:8080"
 EOF
-docker-compose up -d
+sudo docker-compose up -d
 
 # Stop and disable the system's default DHCP and DNS services
 sudo systemctl stop systemd-resolved
