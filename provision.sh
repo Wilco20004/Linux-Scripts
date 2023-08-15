@@ -1,15 +1,14 @@
 sudo apt-get remove docker docker-engine docker.io containerd runc
 sudo apt-get update
 # Stop and disable the system's default DHCP and DNS services
-#sudo systemctl stop systemd-resolved
-#sudo systemctl disable systemd-resolved
+
 sudo apt-get install \
     ca-certificates \
     curl \
     gnupg \
     lsb-release \
-    hostapd #\
-   # dnsmasq
+    hostapd \
+    dnsmasq
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 echo \
@@ -41,11 +40,10 @@ services:
     volumes:
       - /var/docker/v4-server:/app/wwwroot/content
     ports:
-      - "8000:8080"
+      - "80:80"
 EOF
 sudo docker-compose up -d
 
-docker run --name nginx-container -v /var/docker/nginx/nginx.conf:/etc/nginx/nginx.conf -d -p 80:80 nginx
 
 # Configure network interface
 sudo ip link set wlp1s0 down
@@ -54,12 +52,12 @@ sudo ip addr add 192.168.0.98/24 dev wlp1s0
 sudo ip link set wlp1s0 up
 
 # Start DHCP and DNS with dnsmasq
-#sudo chmod 0777 /etc/dnsmasq.conf
-#sudo cat << EOF > /etc/dnsmasq.conf
-#interface=wlp1s0
-#dhcp-range=192.168.0.10,192.168.0.60,12h
-#address=/#/192.168.0.98
-#EOF
+sudo chmod 0777 /etc/dnsmasq.conf
+sudo cat << EOF > /etc/dnsmasq.conf
+interface=wlp1s0
+dhcp-range=192.168.0.10,192.168.0.60,12h
+address=/#/192.168.0.98
+EOF
 
 # Configure hostapd for the access point
 sudo touch /etc/hostapd/hostapd.conf
@@ -75,17 +73,20 @@ ignore_broadcast_ssid=0
 EOF
 
 # Start hostapd and dnsmasq
+sudo systemctl stop systemd-resolved
+sudo systemctl disable systemd-resolved
 sudo systemctl unmask hostapd
 sudo systemctl enable hostapd
 sudo systemctl start hostapd
-#sudo systemctl enable dnsmasq
-#sudo systemctl start dnsmasq
+sudo systemctl enable dnsmasq
+sudo systemctl start dnsmasq
 
 # Enable IP forwarding to provide internet access
-#sudo sysctl net.ipv4.ip_forward=1
-#sudo iptables -t nat -A POSTROUTING -o <your_internet_interface> -j MASQUERADE
+sudo sysctl net.ipv4.ip_forward=1
+sudo iptables -t nat -A PREROUTING -i wlp1s0 -p tcp --dport 80 -j DNAT --to-destination view4all.tv
+sudo iptables -t nat -A POSTROUTING -j MASQUERADE
 
 # Save the IP forwarding configuration
-#sudo sh -c "echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf"
+sudo sh -c "echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf"
 
 echo "Setup complete. The Access Point with SSID 'View4All' and captive portal is now running."
