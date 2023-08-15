@@ -8,7 +8,7 @@ sudo apt-get install \
     gnupg \
     lsb-release \
     hostapd \
-    dnsmasq
+    dnsmasq -y
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 echo \
@@ -81,9 +81,13 @@ sudo systemctl start hostapd
 sudo systemctl enable dnsmasq
 sudo systemctl start dnsmasq
 
+#set nameserver for dnsmarq so that queries can work
+sudo chmod 0777 /etc/resolv.conf
+sudo echo "nameserver 1.1.1.1" > /etc/resolv.conf
+
 # Enable IP forwarding to provide internet access
 sudo sysctl net.ipv4.ip_forward=1
-sudo iptables -t nat -A PREROUTING -i wlp1s0 -p tcp --dport 80 -j DNAT --to-destination view4all.tv
+sudo iptables -t nat -A PREROUTING -i wlp1s0 -p tcp --dport 80 -j DNAT --to-destination 192.168.0.98
 sudo iptables -t nat -A POSTROUTING -j MASQUERADE
 
 # Save the IP forwarding configuration
