@@ -27,24 +27,6 @@ sudo docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
 sudo mkdir /var/docker
 sudo chmod 0777 /var/docker
 
-cat <<EOF > docker-compose.yml
-version: '3.8'
-
-services:
-  view4all:
-    image: registry.peachss.co.za/view4all_client-server:qa
-    container_name: view4all_container
-    environment:
-      - DeviceID=v4a_fitlet-bench02
-      - ParentServer=https://ver4.view4all.tv/
-    volumes:
-      - /var/docker/v4-server:/app/wwwroot/content
-    ports:
-      - "80:80"
-EOF
-sudo docker-compose up -d
-
-
 # Configure network interface
 sudo ip link set wlp1s0 down
 sudo ip addr flush dev wlp1s0
@@ -92,5 +74,22 @@ sudo iptables -t nat -A POSTROUTING -j MASQUERADE
 
 # Save the IP forwarding configuration
 sudo sh -c "echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf"
+
+cat <<EOF > docker-compose.yml
+version: '3.8'
+
+services:
+  view4all:
+    image: registry.peachss.co.za/view4all_client-server:qa
+    container_name: view4all_container
+    environment:
+      - DeviceID=v4a_fitlet-bench02
+      - ParentServer=https://ver4.view4all.tv/
+    volumes:
+      - /var/docker/v4-server:/app/wwwroot/content
+    ports:
+      - "80:80"
+EOF
+sudo docker-compose up -d
 
 echo "Setup complete. The Access Point with SSID 'View4All' and captive portal is now running."
