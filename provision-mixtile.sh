@@ -92,7 +92,7 @@ services:
   view4all:
     image: registry.peachss.co.za/view4all_client-server:arm
     container_name: view4all_container
-    restart: unless-stoppeddh
+    restart: unless-stopped
     environment:
       - DeviceID=v4a_mixtile-bench01
       - ParentServer=https://ver4.view4all.tv/
