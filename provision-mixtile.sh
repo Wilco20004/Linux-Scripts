@@ -42,6 +42,17 @@ sudo ip addr flush dev wlan0
 sudo ip addr add 192.168.8.98/24 dev wlan0
 sudo ip link set wlan0 up
 
+config_to_add="
+auto wlan0
+iface wlan0 inet static
+    address 192.168.8.98
+    netmask 255.255.255.0
+    gateway 192.168.8.98
+"
+
+# Append the configuration to the interfaces file
+echo "$config_to_add" | sudo tee -a /etc/network/interfaces > /dev/null
+
 # Start DHCP and DNS with dnsmasq
 sudo chmod 0777 /etc/dnsmasq.conf
 sudo cat << EOF > /etc/dnsmasq.conf
