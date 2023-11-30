@@ -109,7 +109,7 @@ services:
       - ParentServer=https://ver4.view4all.tv/
     volumes:
       - /userdata/docker/v4-server:/app/wwwroot/content
-   nginx:
+  nginx:
     image: 'jc21/nginx-proxy-manager:latest'
     restart: unless-stopped
     ports:
