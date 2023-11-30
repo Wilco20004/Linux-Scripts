@@ -92,12 +92,21 @@ services:
   view4all:
     image: registry.peachss.co.za/view4all_client-server:arm
     container_name: view4all_container
+    restart: unless-stoppeddh
     environment:
       - DeviceID=v4a_mixtile-bench01
       - ParentServer=https://ver4.view4all.tv/
     volumes:
-      - /var/docker/v4-server:/app/wwwroot/content
+      - /userdata/docker/v4-server:/app/wwwroot/content
+   nginx:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
     ports:
-      - "80:80"
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - /userdata/docker/nginx/data:/data
+      - /userdata/docker/nginx/letsencrypt:/etc/letsencrypt
 EOF
 sudo docker-compose up -d
