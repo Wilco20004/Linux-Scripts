@@ -30,15 +30,26 @@ sudo chmod 0777 /var/docker
 # Configure network interface
 sudo ip link set wlp1s0 down
 sudo ip addr flush dev wlp1s0
-sudo ip addr add 192.168.0.98/24 dev wlp1s0
+sudo ip addr add 192.168.8.98/24 dev wlp1s0
 sudo ip link set wlp1s0 up
+
+config_to_add="
+auto wlan0
+iface wlan0 inet static
+    address 192.168.8.98
+    netmask 255.255.255.0
+    gateway 192.168.8.98
+"
+
+# Append the configuration to the interfaces file
+echo "$config_to_add" | sudo tee -a /etc/network/interfaces > /dev/null
 
 # Start DHCP and DNS with dnsmasq
 sudo chmod 0777 /etc/dnsmasq.conf
 sudo cat << EOF > /etc/dnsmasq.conf
 interface=wlp1s0
-dhcp-range=192.168.0.10,192.168.0.60,12h
-address=/#/192.168.0.98
+dhcp-range=192.168.8.10,192.168.8.60,12h
+address=/#/192.168.8.98
 EOF
 
 # Configure hostapd for the access point
@@ -69,7 +80,7 @@ sudo echo "nameserver 1.1.1.1" > /etc/resolv.conf
 
 # Enable IP forwarding to provide internet access
 sudo sysctl net.ipv4.ip_forward=1
-sudo iptables -t nat -A PREROUTING -i wlp1s0 -p tcp --dport 80 -j DNAT --to-destination 192.168.0.98
+sudo iptables -t nat -A PREROUTING -i wlp1s0 -p tcp --dport 80 -j DNAT --to-destination 192.168.8.98
 sudo iptables -t nat -A POSTROUTING -j MASQUERADE
 
 # Save the IP forwarding configuration
@@ -82,13 +93,22 @@ services:
   view4all:
     image: registry.peachss.co.za/view4all_client-server:qa
     container_name: view4all_container
+    restart: unless-stopped
     environment:
-      - DeviceID=v4a_fitlet-bench02
+      - DeviceID=v4a_mixtile-bench01
       - ParentServer=https://ver4.view4all.tv/
     volumes:
       - /var/docker/v4-server:/app/wwwroot/content
+  nginx:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
     ports:
-      - "80:80"
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - /var/docker/nginx/data:/data
+      - /var/docker/nginx/letsencrypt:/etc/letsencrypt
 EOF
 sudo docker-compose up -d
 
