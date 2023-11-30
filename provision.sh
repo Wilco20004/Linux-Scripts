@@ -99,6 +99,9 @@ services:
       - ParentServer=https://ver4.view4all.tv/
     volumes:
       - /var/docker/v4-server:/app/wwwroot/content
+    networks:
+      view4all_net:
+        ipv4_address: 172.18.0.3
   nginx:
     image: 'jc21/nginx-proxy-manager:latest'
     restart: unless-stopped
@@ -109,6 +112,16 @@ services:
     volumes:
       - /var/docker/nginx/data:/data
       - /var/docker/nginx/letsencrypt:/etc/letsencrypt
+    networks:
+      view4all_net:
+        ipv4_address: 172.18.0.2
+networks:
+  view4all_net:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 172.18.0.0/24
+         gateway: 172.18.0.1
 EOF
 sudo docker-compose up -d
 
