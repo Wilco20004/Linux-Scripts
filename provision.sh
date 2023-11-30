@@ -34,8 +34,8 @@ sudo ip addr add 192.168.8.98/24 dev wlp1s0
 sudo ip link set wlp1s0 up
 
 config_to_add="
-auto wlan0
-iface wlan0 inet static
+auto wlp1s0
+iface wlp1s0 inet static
     address 192.168.8.98
     netmask 255.255.255.0
     gateway 192.168.8.98
