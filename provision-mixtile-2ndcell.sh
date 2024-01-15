@@ -66,7 +66,7 @@ sudo touch /etc/hostapd/hostapd.conf
 sudo chmod 0777 /etc/hostapd/hostapd.conf
 sudo cat << EOF > /etc/hostapd/hostapd.conf
 interface=wlan0
-ssid=View4All
+ssid=R5 VIDEOS - DATA FREE
 hw_mode=g
 channel=6
 macaddr_acl=0
@@ -105,8 +105,8 @@ services:
     container_name: view4all_container
     restart: unless-stopped
     environment:
-      - DeviceID=v4a_mixtile-bench01
-      - ParentServer=https://ver4.view4all.tv/
+      - DeviceID=2ndcell-mixtile-001
+      - ParentServer=https://2ndcell.vqa.view4all.tv/
     volumes:
       - /userdata/docker/v4-server:/app/wwwroot/content
   nginx:
