@@ -125,7 +125,7 @@ services:
       - DeviceID=2ndcell-mixtile-001
       - ParentServer=https://2ndcell.vqa.view4all.tv/
     volumes:
-      - /userdata/docker/v4-server:/app/wwwroot/content
+      - /media/nvme/docker/v4-server:/app/wwwroot/content
   nginx:
     image: 'jc21/nginx-proxy-manager:latest'
     restart: unless-stopped
@@ -134,7 +134,7 @@ services:
       - '81:81'
       - '443:443'
     volumes:
-      - /userdata/docker/nginx/data:/data
-      - /userdata/docker/nginx/letsencrypt:/etc/letsencrypt
+      - /media/nvme/docker/nginx/data:/data
+      - /media/nvme/docker/nginx/letsencrypt:/etc/letsencrypt
 EOF
 sudo docker-compose up -d
