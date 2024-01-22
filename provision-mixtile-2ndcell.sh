@@ -33,9 +33,24 @@ sudo docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
     -v portainer_data:/data \
     cr.portainer.io/portainer/portainer-ce:latest
 
-    #Prep docker folders 
-sudo mkdir /var/docker
-sudo chmod 0777 /var/docker
+sudo timedatectl set-timezone Africa/Johannesburg
+sudo parted -s nvme0n1 mklabel gpt
+sudo parted -s nvme0n1 mkpart primary "ext4" 0% "235GiB"
+sudo mkfs.ext4 nvme0n1p1
+sudo mkdir -p /media/nvme
+sudo mount /dev/nvme0n1p1 /media/nvme
+/dev/nvme0n1p1 /media/nvme ext4 defaults 0 0
+
+sudo umount /oem
+sudo umount /userdata
+sudo parted /dev/mmcblk0 rm 8
+sudo parted /dev/mmcblk0 rm 7
+sudo parted /dev/mmcblk0 resizepart 6 100%
+sudo resize2fs /dev/mmcblk0p6
+
+#Prep docker folders 
+sudo mkdir /media/nvme/docker
+sudo chmod 0777 /media/nvme/docker
 
 sudo ip link set wlan0 down
 sudo ip addr flush dev wlan0
@@ -84,6 +99,8 @@ sudo systemctl enable dnsmasq
 sudo systemctl start dnsmasq
 
 #set nameserver for dnsmarq so that queries can work
+sudo rm /etc/resolv.conf
+sudo touch /etc/resolv.conf
 sudo chmod 0777 /etc/resolv.conf
 sudo echo "nameserver 1.1.1.1" > /etc/resolv.conf
 
