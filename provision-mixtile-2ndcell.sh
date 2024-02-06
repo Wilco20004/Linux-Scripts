@@ -2,17 +2,8 @@ sudo apt-get remove docker docker-engine docker.io containerd runc
 sudo apt-get update
 # Stop and disable the system's default DHCP and DNS services
 
-sudo apt-get install \
-    ca-certificates \
-    curl \
-    gnupg \
-    lsb-release \
-    hostapd \
-    nano \
-    dnsmasq -y
+sudo apt-get install ca-certificates curl gnupg lsb-release hostapd nano dnsmasq ca-certificates curl gnupg -y
 
-sudo apt-get update
-sudo apt-get install ca-certificates curl gnupg
 sudo install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 sudo chmod a+r /etc/apt/keyrings/docker.gpg
@@ -23,7 +14,7 @@ echo \
   "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli docker-compose containerd.io docker-buildx-plugin docker-compose-plugin
+sudo apt-get install docker-ce docker-ce-cli docker-compose containerd.io docker-buildx-plugin docker-compose-plugin -y
 
 #Install portainer management portal
 sudo docker volume create portainer_data
@@ -34,6 +25,9 @@ sudo docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
     cr.portainer.io/portainer/portainer-ce:latest
 
 sudo timedatectl set-timezone Africa/Johannesburg
+cd /usr/local/bin
+sudo ./module_select.sh
+
 sudo parted -s nvme0n1 mklabel gpt
 sudo parted -s nvme0n1 mkpart primary "ext4" 0% "235GiB"
 sudo mkfs.ext4 nvme0n1p1
@@ -122,7 +116,7 @@ services:
     container_name: view4all_container
     restart: unless-stopped
     environment:
-      - DeviceID=2ndcell-mixtile-001
+      - DeviceID=2ndcell-mixtile-004
       - ParentServer=https://2ndcell.vqa.view4all.tv/
     volumes:
       - /media/nvme/docker/v4-server:/app/wwwroot/content
@@ -138,3 +132,39 @@ services:
       - /media/nvme/docker/nginx/letsencrypt:/etc/letsencrypt
 EOF
 sudo docker-compose up -d
+
+#Enable 4G
+sudo touch /lib/systemd/system/4G.service
+sudo chmod 0777 /lib/systemd/system/4G.service
+sudo cat << EOF > /lib/systemd/system/4G.service
+[Unit]
+Description=4G Service
+After=network.target
+
+[Service]
+ExecStart=/etc/init.d/quectel-CM -s flickswitch
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable 4G
+sudo systemctl start 4G
+
+# Update SSH configuration
+mkdir ~/.ssh
+echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCLnNDE1DDgt2QZPSdo+eRhSEts8umPjwdO3K8JsXWd3lgkGXO/X8IfiZrZCclC8LRTb7O7lAUfvtWAq8BEjrDTUV05eegyiK6MYXdxl5Nhp5MHWsgtaLkQGIzNpNBDGtuFg07kLEwunKLct87soVeiOJHx6ULxEW5p7pT9ErSHkXE/1BW9ZRjZuxeIckOF2rmcHAWGKcs3V7xbuZYAgwgWNqBMmjA3bbwpqXR33WOgvXuCeT18r4BvISZYVMfuUiGDRDxgaCbOgYQM+PM/ulCGlbPUFb7kJ97vplWvEhjwpRHruf7xr4JHdEaltzQ1BWxH8ombAqCHRm7UIxXKepY3 Wilco" >> ~/.ssh/authorized_keys
+echo "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEA5m/JxKerXL/oOAisXVnuFELDaoMXCkG7AfXmsTTrv0sBcO7yrY6tgZEY/b6BrJ9/aLko6pq1IKp52271QK9f2TzRPpQyeei60/5xjSFJRGbQK9FTmlH82HyztoruiXYgeU22bAv6sLzO0Y0/peO72iGvo7p/I83rdF7XSvsY1scfimW+sF/KfQm1Hq5Bo9wrPij//yRt5PRG2kPTjMErv6LC3cdwaeyjqQDOhx7eJlolYKS/xWgRREKd2np3mhaJ/zFAMh01TE2/WLc0YD2bpHQuqM/YXgAndE0Vzhdo8PxsRPDklXzvs+vmCLTWcZteVC/gFqw7Jw1HGQHGxg4qqQ== rsa-key-20210324-view4all" >> ~/.ssh/authorized_keys
+
+
+sudo sed -i 's/^PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+sudo sed -i 's/^ChallengeResponseAuthentication yes/ChallengeResponseAuthentication no/' /etc/ssh/sshd_config
+sudo sed -i 's/^#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+sudo sed -i 's/^#ChallengeResponseAuthentication no/ChallengeResponseAuthentication no/' /etc/ssh/sshd_config
+sudo sed -i 's/^#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+
+
+sudo systemctl restart ssh
