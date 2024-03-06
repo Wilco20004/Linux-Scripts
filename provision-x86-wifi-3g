@@ -101,7 +101,7 @@ services:
     container_name: view4all_container
     restart: unless-stopped
     environment:
-      - DeviceID=2ndcell-mixtile-004
+      - DeviceID=Interstate-fitlet-004
       - ParentServer=https://interstate.vqa.view4all.tv/
     volumes:
       - /var/docker/v4-server:/app/wwwroot/content
