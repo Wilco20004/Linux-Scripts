@@ -31,10 +31,10 @@ sudo timedatectl set-timezone Africa/Johannesburg
 sudo mkdir /var/docker
 sudo chmod 0777 /var/docker
 
-sudo ip link set wlan0 down
-sudo ip addr flush dev wlan0
-sudo ip addr add 192.168.8.98/24 dev wlan0
-sudo ip link set wlan0 up
+sudo ip link set wlp1s0 down
+sudo ip addr flush dev wlp1s0
+sudo ip addr add 192.168.8.98/24 dev wlp1s0
+sudo ip link set wlp1s0 up
 
 config_to_add="
 auto wlp1s0
