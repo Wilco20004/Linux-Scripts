@@ -37,8 +37,8 @@ sudo ip addr add 192.168.8.98/24 dev wlan0
 sudo ip link set wlan0 up
 
 config_to_add="
-auto wlan0
-iface wlan0 inet static
+auto wlp1s0
+iface wlp1s0 inet static
     address 192.168.8.98
     netmask 255.255.255.0
     gateway 192.168.8.98
@@ -50,7 +50,7 @@ echo "$config_to_add" | sudo tee -a /etc/network/interfaces > /dev/null
 # Start DHCP and DNS with dnsmasq
 sudo chmod 0777 /etc/dnsmasq.conf
 sudo cat << EOF > /etc/dnsmasq.conf
-interface=wlan0
+interface=wlp1s0
 dhcp-range=192.168.8.10,192.168.8.60,12h
 address=/#/192.168.8.98
 EOF
@@ -59,7 +59,7 @@ EOF
 sudo touch /etc/hostapd/hostapd.conf
 sudo chmod 0777 /etc/hostapd/hostapd.conf
 sudo cat << EOF > /etc/hostapd/hostapd.conf
-interface=wlan0
+interface=wlp1s0
 ssid=View4All
 hw_mode=g
 channel=6
