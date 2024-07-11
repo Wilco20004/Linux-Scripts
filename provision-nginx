@@ -22,13 +22,12 @@ docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
 sudo mkdir /var/docker
 sudo chmod 0777 /var/docker
 
-sudo docker run --name code-server -p 9111:8080 \
-  -v "/var/docker/coder:/home/coder" \
-  -v "/var/docker/coder/docker:/home/coder/docker" \
-  -u "$(id -u):$(id -g)" \
-  -e "DOCKER_USER=$USER" \
+sudo docker run --name nginx -p 80:80 -p 81:81 -p 443:443 \
+  -v "/var/docker/nginx/data:/data" \
+  -v "/var/docker/nginx/letsencrypt:/letsencrypt" \
   codercom/code-server:latest
 
 
 sudo ufw allow 80
 sudo ufw allow 443
+sudo ufw allow 81
