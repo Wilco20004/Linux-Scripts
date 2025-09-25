@@ -5,7 +5,7 @@ const axios = require('axios');
 require('dotenv').config();
 
 // Initialize Express app and client in the same file to ensure they are connected
-const app = require('./app'); // Assuming your API file is named app.js
+const app = require('./server'); // Assuming your API file is named app.js
 
 var ip = Object.values(require('os').networkInterfaces()).reduce((r, list) => r.concat(list.reduce((rr, i) => rr.concat(i.family === 'IPv4' && !i.internal && i.address || []), [])), []);
 
