@@ -1,6 +1,6 @@
 const fs = require('fs');
 const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
+const qrcode = require('qrcode');
 const axios = require('axios');
 require('dotenv').config();
 
@@ -34,20 +34,29 @@ global.client = client;
 
 // QR Code Event
 client.on('qr', (qr) => {
-    console.log('QR RECEIVED', qr);
-    qrcode.generate(qr, { small: true });
+    console.log('QR RECEIVED:', qr);
 
-    // Convert QR string to base64 and send to server
-    const qrBuffer = Buffer.from(qr);
-    axios.post(process.env.ServerIP + '/api/v1.0/WACallback/QRCodeReceived', {
-        "instanceID": process.env.InstanceID,
-        "qrData": qrBuffer.toString('base64')
-    }).then(res => {
-        console.log(`qr sent: ${res.status}`);
-        console.log(res.data);
-    })
-    .catch(error => {
-        console.error(error);
+    // Generate a Base64 string of the QR code image
+    qrcode.toDataURL(qr, (err, url) => {
+        if (err) {
+            console.error('Failed to generate QR code:', err);
+            return;
+        }
+
+        // The 'url' is a data URI, e.g., "data:image/png;base64,iVBORw0K..."
+        // You may need to slice the prefix depending on what your API expects.
+        const base64Image = url.split(',')[1];
+
+        // Send the Base64 image data to your server
+        axios.post(process.env.ServerIP + '/api/v1.0/WACallback/QRCodeReceived', {
+            "instanceID": process.env.InstanceID,
+            "qrData": base64Image
+        }).then(res => {
+            console.log(`QR sent: ${res.status}`);
+            console.log(res.data);
+        }).catch(error => {
+            console.error("Error sending QR code:", error);
+        });
     });
 });
 
